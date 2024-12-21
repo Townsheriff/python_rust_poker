@@ -10,16 +10,6 @@ A poker library written in rust.
  - Fast hand evaluation
  - Efficient hand indexing
 
-
-## Installation
-
-Add this to your `Cargo.toml`:
-```
-[dependencies]
-rust_poker = "0.1.13"
-```
-**Note**: The first build of an application using `rust_poker` will take extra time to generate the hand evaluation table
-
 ## Developing Bindings
 
 Use virtual env `virtualenv .venv`.
@@ -38,31 +28,21 @@ Evaluates the strength of any poker hand using up to 7 cards.
 
 ### Usage
 
-```rust
-use rust_poker::hand_evaluator::{Hand, CARDS, evaluate};
-// cards are indexed 0->51 where index is 4 * rank + suit
-let hand = Hand::empty() + CARDS[0] + CARDS[1];
-let score = evaluate(&hand);
-println!("score: {}", score);
+```python
+import pyrust_poker
+
+keep_cards_mask = np.zeros(shape=(2, 52), dtype=np.uint64)
+
+keep_cards_mask[0, [0, 4, 8, 12, 48]] = 1 # 36865 - straight flush 5 high
+keep_cards_mask[1, [48, 44, 40, 36, 32]] = 1 # 36874 - straight flush S high
+
+pyrust_poker.get_hand_strengths(keep_cards_mask)
 ```
 
 ## Equity Calculator
 
 Calculates the range vs range equities for up to 6 different ranges specified by equilab-like range strings.
 Supports monte-carlo simulations and exact equity calculations
-
-### Usage
-
-```rust
-use rust_poker::hand_range::{HandRange, get_card_mask};
-use rust_poker::equity_calculator::approx_equity;
-let ranges = HandRange::from_strings(["AK,22+".to_string(), "random".to_string()].to_vec());
-let public_cards = get_card_mask("2h3d4c".to_string());
-let stdev_target = 0.01;
-let n_threads = 4;
-let equities = approx_equity(&ranges, public_cards, n_threads, stdev_target);
-println!("player 1 equity: {}", equities[0]);
-```
 
 ## Credit
 
