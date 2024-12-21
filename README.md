@@ -20,6 +20,18 @@ rust_poker = "0.1.13"
 ```
 **Note**: The first build of an application using `rust_poker` will take extra time to generate the hand evaluation table
 
+## Developing Bindings
+
+Use virtual env `virtualenv .venv`.
+
+Enable the envirnmoent `source .venv/bin/activate`
+
+Run `maturin develop` to create ptyhon lib with bindings, it will automatically put it inside the python packages dir.
+
+To test out point the ipynb notebooks kernel to virtualenv and then just run the package.
+
+To install pytohn packages `pip install poetry && poetry install --no-root`
+
 ## Hand Evaluator
 
 Evaluates the strength of any poker hand using up to 7 cards.

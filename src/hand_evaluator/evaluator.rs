@@ -1,5 +1,5 @@
 use super::hand;
-
+use pyo3::prelude::*;
 use read_write::VecIO;
 
 // use rust_embed::RustEmbed;
@@ -8,23 +8,30 @@ use std::env;
 use std::fs::File;
 use std::num::Wrapping;
 
-/// Must point to same directory as `gen_eval_table`
-// #[derive(RustEmbed)]
-// #[folder = "eval_table"]
-// struct Asset;
-
-/// filename to write and read perf hash offset table
-// const OUT_DIR: &str = "STATIC_ASSET_DIR";
-// const PERF_HASH_FILENAME: &str = "h_eval_offsets.dat";
-// const RANK_TABLE_FILENAME: &str = "h_eval_rank_table.dat";
-// const FLUSH_TABLE_FILENAME: &str = "h_eval_flush_table.dat";
+use hand::poker_hand;
 
 const PERF_HASH_ROW_SHIFT: usize = 12;
 
 /// Evaluates a single hand and returns score
+#[pyfunction]
 #[inline(always)]
 pub fn evaluate(hand: &hand::Hand) -> u16 {
     LOOKUP_TABLE.evaluate(hand)
+}
+
+#[pyfunction]
+#[inline(always)]
+pub fn evaluate_list(list: Vec<(u64, u64)>) -> Vec<u16> {
+    let mut hand = hand::Hand::default();
+
+    list.iter()
+        .map(|(key, mask)| {
+            hand.key = *key;
+            hand.mask = *mask;
+
+            LOOKUP_TABLE.evaluate(&hand)
+        })
+        .collect()
 }
 
 /// Evaluates a single hand and returns score
@@ -89,6 +96,19 @@ impl Evaluator {
         (Wrapping(key as u32) + Wrapping(self.perf_hash_offsets[key >> PERF_HASH_ROW_SHIFT])).0
             as usize
     }
+}
+
+#[pymodule]
+fn rust_poker(m: &Bound<'_, PyModule>) -> PyResult<()> {
+    m.add_function(wrap_pyfunction!(evaluate, m)?)?;
+    m.add_function(wrap_pyfunction!(evaluate_list, m)?)?;
+
+    let hand_module = PyModule::new(m.py(), "poker_hand")?;
+
+    poker_hand(&hand_module)?;
+    m.add_submodule(&hand_module)?;
+
+    Ok(())
 }
 
 #[cfg(test)]

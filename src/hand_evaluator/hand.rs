@@ -1,3 +1,4 @@
+use pyo3::prelude::*;
 use std::ops::Add;
 use std::ops::AddAssign;
 
@@ -14,9 +15,12 @@ const FLUSH_CHECK_MASK32: u32 = 0x8888u32 << (SUITS_SHIFT - 32) as u32;
 /// Bits 32-35: card counter
 /// Bits 48-63: suit counter
 /// Bits 64-128: Bit mask for all cards (suits in 16 bit groups)
+#[pyclass]
 #[derive(Debug, Copy, Clone)]
 pub struct Hand {
+    #[pyo3(get, set)]
     pub key: u64,
+    #[pyo3(get, set)]
     pub mask: u64,
 }
 
@@ -25,13 +29,20 @@ lazy_static! {
     pub static ref CARDS: [Hand; 52] = init_card_constants();
 }
 
+#[pymethods]
 impl Hand {
+    #[new]
+    pub fn new() -> Self {
+        Self::default()
+    }
     /// Create hand from hole cards
+    #[staticmethod]
     pub fn from_hole_cards(c1: u8, c2: u8) -> Hand {
         CARDS[usize::from(c1)] + CARDS[usize::from(c2)]
     }
 
     /// construct a Hand object from board mask
+    #[staticmethod]
     pub fn from_bit_mask(mask: u64) -> Hand {
         let mut board = Hand::default();
         for c in 0..usize::from(CARD_COUNT) {
@@ -43,28 +54,28 @@ impl Hand {
     }
 
     /// Return first 64 bits
-    pub const fn get_key(self) -> u64 {
+    pub const fn get_key(&self) -> u64 {
         self.key
     }
     /// Return last 64 bits
-    pub const fn get_mask(self) -> u64 {
+    pub const fn get_mask(&self) -> u64 {
         self.mask
     }
     /// get rank key of card for lookup table
-    pub const fn get_rank_key(self) -> usize {
+    pub const fn get_rank_key(&self) -> usize {
         // get last 32 bits
         let key = self.key as u32;
         // cast to usize
         key as usize
     }
     /// Return counter bits
-    pub const fn get_counters(self) -> u32 {
+    pub const fn get_counters(&self) -> u32 {
         (self.key >> 32) as u32
     }
     /// Get flush key of card for lookup table
     ///
     /// Returns 0 if there is no flush
-    pub fn get_flush_key(self) -> usize {
+    pub fn get_flush_key(&self) -> usize {
         // if hand has flush, return key
         // check to prevent throwing overflow error
         if self.has_flush() {
@@ -78,16 +89,16 @@ impl Hand {
             0
         }
     }
-    pub const fn has_flush(self) -> bool {
+    pub const fn has_flush(&self) -> bool {
         (self.get_key() & FLUSH_CHECK_MASK64) != 0
     }
     // Return number of cards in hand
-    pub const fn count(self) -> u32 {
+    pub const fn count(&self) -> u32 {
         (self.get_counters() >> (CARD_COUNT_SHIFT - 32)) & 0xf
     }
 
     /// Get the number of cards for a suit
-    pub const fn suit_count(self, suit: u8) -> i32 {
+    pub const fn suit_count(&self, suit: u8) -> i32 {
         let shift = 4 * suit + (SUITS_SHIFT - 32);
         (((self.get_counters() >> shift) & 0xf) as i32) - 3
     }
@@ -163,6 +174,23 @@ fn init_card_constants() -> [Hand; 52] {
     }
 
     hands
+}
+
+#[pyfunction]
+fn get_cards(py: Python) -> PyResult<Vec<Py<Hand>>> {
+    // Convert Rust's CARDS array to a Python list of Hand objects
+    let cards: Vec<Py<Hand>> = CARDS
+        .iter()
+        .map(|&hand| Py::new(py, hand))
+        .collect::<Result<_, _>>()?;
+    Ok(cards)
+}
+
+pub fn poker_hand(m: &Bound<'_, PyModule>) -> PyResult<()> {
+    m.add_class::<Hand>()?;
+    m.add_function(wrap_pyfunction!(get_cards, m)?)?;
+
+    Ok(())
 }
 
 #[cfg(test)]
