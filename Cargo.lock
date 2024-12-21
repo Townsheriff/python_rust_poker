@@ -479,6 +479,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "pyrust_poker"
+version = "0.1.14"
+dependencies = [
+ "crossbeam",
+ "fastdivide",
+ "gen_eval_table",
+ "hand_indexer",
+ "lazy_static",
+ "pyo3",
+ "rand",
+ "read_write",
+ "serde",
+ "serde_json",
+ "thiserror",
+]
+
+[[package]]
 name = "quick-error"
 version = "1.2.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -574,23 +591,6 @@ name = "regex-syntax"
 version = "0.6.22"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b5eb417147ba9860a96cfe72a0b93bf88fee1744b5636ec99ab20c1aa9376581"
-
-[[package]]
-name = "rust_poker"
-version = "0.1.14"
-dependencies = [
- "crossbeam",
- "fastdivide",
- "gen_eval_table",
- "hand_indexer",
- "lazy_static",
- "pyo3",
- "rand",
- "read_write",
- "serde",
- "serde_json",
- "thiserror",
-]
 
 [[package]]
 name = "ryu"

@@ -99,7 +99,7 @@ impl Evaluator {
 }
 
 #[pymodule]
-fn rust_poker(m: &Bound<'_, PyModule>) -> PyResult<()> {
+fn pyrust_poker(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(evaluate, m)?)?;
     m.add_function(wrap_pyfunction!(evaluate_list, m)?)?;
 
