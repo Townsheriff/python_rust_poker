@@ -34,7 +34,7 @@ import pyrust_poker
 keep_cards_mask = np.zeros(shape=(2, 52), dtype=np.uint64)
 
 keep_cards_mask[0, [0, 4, 8, 12, 48]] = 1 # 36865 - straight flush 5 high
-keep_cards_mask[1, [48, 44, 40, 36, 32]] = 1 # 36874 - straight flush S high
+keep_cards_mask[1, [48, 44, 40, 36, 32]] = 1 # 36874 - straight flush A high
 
 pyrust_poker.get_hand_strengths(keep_cards_mask)
 ```
