@@ -21,6 +21,9 @@ def get_hand_strengths(hand_masks: np.array):
       (np.array(n, 1): for every n hand masked is mapped to an absolute value u16 for hand strength. 
       To determine which hand is stronger just compare with ><= operators
   """
+  # avoids floating point errors
+  hand_masks = hand_masks.astype(np.bool)
+  
   keep_keys = np.multiply(poker_keys, hand_masks).astype(np.uint64)
   keep_mask = np.multiply(poker_mask, hand_masks).astype(np.uint64)
   

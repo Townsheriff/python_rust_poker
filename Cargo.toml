@@ -1,6 +1,6 @@
 [package]
 name = "pyrust_poker"
-version = "0.2.2"
+version = "0.2.3"
 authors = ["kmurf1999 <kwmurph2@asu.edu>"]
 repository = "https://github.com/Townsheriff/python_rust_poker"
 description = "Rust poker library"
