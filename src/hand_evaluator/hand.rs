@@ -1,4 +1,6 @@
 use pyo3::prelude::*;
+use std::collections::HashMap;
+use std::convert::TryFrom;
 use std::ops::Add;
 use std::ops::AddAssign;
 
@@ -101,6 +103,91 @@ impl Hand {
     pub const fn suit_count(&self, suit: u8) -> i32 {
         let shift = 4 * suit + (SUITS_SHIFT - 32);
         (((self.get_counters() >> shift) & 0xf) as i32) - 3
+    }
+}
+
+use phf::phf_map;
+
+static RANK_VALUES: phf::Map<char, u32> = phf_map! {
+    '2' => 0,
+    '3' => 4,
+    '4' => 8,
+    '5' => 12,
+    '6' => 16,
+    '7' => 20,
+    '8' => 24,
+    '9' => 28,
+    'T' => 32,
+    'J' => 36,
+    'Q' => 40,
+    'K' => 44,
+    'A' => 48,
+};
+
+static SUIT_VALUES: phf::Map<char, u32> = phf_map! {
+    'h' => 0,
+    'c' => 1,
+    'd' => 2,
+    's' => 3,
+};
+
+impl TryFrom<&str> for Hand {
+    type Error = &'static str;
+
+    fn try_from(hand_str: &str) -> Result<Self, Self::Error> {
+        let mut hand = Hand::default();
+
+        if hand_str.len() > 14 {
+            return Err("Too many cards in hand");
+        }
+
+        let chars: Vec<char> = hand_str.chars().collect();
+        for card_str in chars.chunks(2) {
+            if card_str.len() != 2 {
+                return Err("Invalid card format");
+            }
+
+            let rank = RANK_VALUES.get(&card_str[0]).ok_or("Invalid rank")?;
+            let suit = SUIT_VALUES.get(&card_str[1]).ok_or("Invalid suit")?;
+
+            // Assuming `CARDS` is an array and `hand +=` is a valid operation
+            hand += CARDS[(rank + suit) as usize];
+        }
+
+        Ok(hand)
+    }
+}
+
+#[cfg(test)]
+mod tests_try_from {
+    use super::*;
+    use std::convert::TryFrom;
+
+    #[test]
+    fn test_from_str_valid_hand() {
+        let hand = Hand::try_from("AhAs").unwrap();
+        assert_eq!(hand.count(), 2);
+        assert!(hand.get_mask() & CARDS[48].get_mask() != 0); // Ah present
+        assert!(hand.get_mask() & CARDS[51].get_mask() != 0); // As present
+    }
+
+    #[test]
+    fn test_from_str_invalid_card() {
+        let hand = Hand::try_from("Ah Xs");
+        assert!(hand.is_err());
+    }
+
+    #[test]
+    fn test_from_str_with_seven_cards() {
+        let hand = Hand::try_from("AhAsKdQhJhTs9s").unwrap();
+        assert!(hand.get_mask() & CARDS[48].get_mask() != 0);
+        assert!(hand.get_mask() & CARDS[51].get_mask() != 0);
+        assert!(hand.get_mask() & CARDS[46].get_mask() != 0);
+        assert!(hand.get_mask() & CARDS[40].get_mask() != 0);
+
+        assert!(hand.get_mask() & CARDS[36].get_mask() != 0);
+        assert!(hand.get_mask() & CARDS[35].get_mask() != 0);
+        assert!(hand.get_mask() & CARDS[31].get_mask() != 0);
     }
 }
 
