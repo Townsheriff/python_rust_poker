@@ -1,5 +1,4 @@
 use pyo3::prelude::*;
-use std::collections::HashMap;
 use std::convert::TryFrom;
 use std::ops::Add;
 use std::ops::AddAssign;

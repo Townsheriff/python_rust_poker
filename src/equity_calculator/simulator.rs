@@ -5,7 +5,6 @@ use std::cmp::Ordering;
 use std::collections::HashMap;
 use thiserror::Error;
 
-use std::error::Error;
 use std::result::Result;
 use std::sync::{Arc, Mutex, RwLock};
 
@@ -286,7 +285,7 @@ impl SimulationResultsBatch {
 /// equity calculator main structure
 #[derive(Debug)]
 struct Simulator {
-    hand_ranges: Vec<HandRange>,
+    // hand_ranges: Vec<HandRange>,
     /// used to reduce rejection sampling
     combined_ranges: Vec<CombinedRange>,
     /// initial board as 64bit mask
@@ -320,7 +319,7 @@ impl Simulator {
         let fixed_board = Hand::from_bit_mask(board_mask);
         let n_players = hand_ranges.len();
         Simulator {
-            hand_ranges,
+            // hand_ranges,
             combined_ranges,
             board_mask,
             fixed_board,

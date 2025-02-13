@@ -42,7 +42,7 @@ all-features = true
 
 [lib]
 name = "pyrust_poker"
-crate-type = ["cdylib"]
+crate-type = ["cdylib", "rlib"]
 
 [package.metadata.pyo3]
 extension-module = true
