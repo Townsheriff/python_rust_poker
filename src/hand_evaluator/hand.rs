@@ -1,9 +1,8 @@
+use crate::constants::*;
 use pyo3::prelude::*;
 use std::convert::TryFrom;
 use std::ops::Add;
 use std::ops::AddAssign;
-
-use crate::constants::*;
 
 const CARD_COUNT_SHIFT: u8 = 32;
 const SUITS_SHIFT: u8 = 48;
@@ -155,6 +154,28 @@ impl TryFrom<&str> for Hand {
 
         Ok(hand)
     }
+}
+
+pub fn get_card_indices(hand_str: &str) -> Result<Vec<usize>, &'static str> {
+    let mut card_indices: Vec<usize> = vec![];
+
+    if hand_str.len() > 14 {
+        return Err("Too many cards in hand");
+    }
+
+    let chars: Vec<char> = hand_str.chars().collect();
+    for card_str in chars.chunks(2) {
+        if card_str.len() != 2 {
+            return Err("Invalid card format");
+        }
+
+        let rank = RANK_VALUES.get(&card_str[0]).ok_or("Invalid rank")?;
+        let suit = SUIT_VALUES.get(&card_str[1]).ok_or("Invalid suit")?;
+
+        card_indices.push((rank + suit) as usize);
+    }
+
+    Ok(card_indices)
 }
 
 #[cfg(test)]

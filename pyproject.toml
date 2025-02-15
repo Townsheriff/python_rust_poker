@@ -22,10 +22,9 @@ authors = ["Arturs Valenieks <arturs.valenieks@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.12"
+python = ">=3.12,<4.0"
 numpy = "^2.2.0"
 
 [tool.poetry.group.dev.dependencies]
 ipykernel = "^6.29.5"
 maturin = "^1.7.8"
-
